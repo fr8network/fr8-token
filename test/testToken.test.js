@@ -21,23 +21,22 @@ contract("Token", accounts => {
     token = await TestToken.new({ from: owner });
     // total supply is one billion tokens, using the ether helper here because decimals is 18
     const totalSupply = ether(100000000);
-    await token.setTotalSupply(totalSupply);
-    await token.awardTokens(destination, value, { from: owner });
   });
 
-  it("can be transferred when transfer is enabled", async () => {
+  it("can be transferred when transfer", async () => {
     assert.ok(token);
-    await token.enableTransfer();
-    await token.transfer(destination, value, { from: spender });
+    await token.transfer(destination, value, { from: owner });
     var destinationBalance = await token.balanceOf(destination);
     destinationBalance.should.be.deep.equal(new BigNumber(value));
   });
 
-  it("cannot be transferred when transfer is disabled", async () => {
-    assert.ok(token);
-    await token.disableTransfer();
-    await token
-      .transfer(destination, value, { from: spender })
-      .should.be.rejectedWith(EVMRevert);
+  xit("cannot be transferred when its not minted", async () => { 
   });
+
+  xit("cannot be minted automatically until owner approves", async () => { 
+  });
+
+  xit("cannot be minted by owner after approval", async () => { 
+  });
+
 });
