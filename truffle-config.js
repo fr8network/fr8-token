@@ -18,6 +18,7 @@ const ropstenProvider = process.env.SOLIDITY_COVERAGE
   : infuraProvider("ropsten");
 
 const rinkebyProvider = infuraProvider("rinkeby");
+const mainnetProvider = infuraProvider("mainnet");
 module.exports = {
   networks: {
     development: {
@@ -48,7 +49,12 @@ module.exports = {
     },
     rinkeby: {
       provider: rinkebyProvider,
-      network_id: 4
+      network_id: 4,
+      gasPrice: 10000000000//25000000000
+    },
+    mainnet: {
+      provider: mainnetProvider,
+      network_id: 1 
     }
   }
 };
