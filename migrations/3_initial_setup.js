@@ -1,5 +1,4 @@
-const TokenSale = artifacts.require("./TokenSale.sol");
-const TestToken = artifacts.require("./TestToken.sol");
+const TestToken = artifacts.require("./Fr8NetworkToken.sol");
 
 module.exports = function(deployer, network, accounts) {
   setupContracts(deployer, accounts);
