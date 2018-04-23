@@ -1,5 +1,5 @@
 const TestToken = artifacts.require("./Fr8NetworkToken.sol");
-
+const ShipmentContract = artifacts.require("./ShipmentContract.sol");
 module.exports = function(deployer, network, accounts) {
   const owner = accounts[0];
   // const owner = "0x11f0cdddd75259b02418e5c116d904621632a590";
@@ -7,6 +7,10 @@ module.exports = function(deployer, network, accounts) {
     const token = await TestToken.deployed();
     // return deployer.deploy(TokenSale, token.address, owner);
   });
+
+  deployer.deploy(ShipmentContract).then(async () => {
+    const shipmentContract = await ShipmentContract.deployed();
+  })
 };
 
 // Running migration: 1_initial_migration.js
