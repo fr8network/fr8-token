@@ -11,6 +11,7 @@ module.exports = function(deployer, network, accounts) {
   deployer.deploy(ShipmentContract).then(async () => {
     const shipmentContract = await ShipmentContract.deployed();
   })
+
 };
 
 // Running migration: 1_initial_migration.js
