@@ -27,16 +27,9 @@ async function doThings(store,bookedStatuses,owner) {
 async function confirmNext(shipment,owner) {
   return shipment.increment({from:owner}).then(res => {
     const { tx } = res;
-    console.log('tx:',tx);
     return web3.eth.getTransactionReceiptMined(tx)
-      .then(cb => {
-        
-        return cb;
-      })
   })
   .then(res => {
-
-
     const { data, topics} = res.logs[0];
     const myInputs = [{
       type: 'string',
@@ -48,8 +41,8 @@ async function confirmNext(shipment,owner) {
       indexed: false
     }]
     const decoded = web3.eth.abi.decodeLog(myInputs,data,topics);
-    console.log('decoded:',decoded);
-    return res;
+    const { prevString, currString } = decoded;
+    return { prevString, currString };
   })  
 }
 
@@ -85,10 +78,18 @@ module.exports = async function(deployer, network, accounts) {
     const next = await shipment.increment();
     const opt3 = await shipment.optimisticNext();
     
-    const a =  await confirmNext(shipment,owner);
 
-    await confirmNext(shipment,owner);
-    await confirmNext(shipment,owner);
+    const a =  await confirmNext(shipment,owner);
+    console.log('a:',a);
+
+    const b = await confirmNext(shipment,owner);
+    console.log('b:',b);
+    const c = await confirmNext(shipment,owner);
+    console.log('c:',c);
+    const d = await confirmNext(shipment,owner);
+    console.log('d:',d);
+
+
     const opt4 = await shipment.optimisticNext();
     // console.log('next:',next);
     const confirmed = await confirmNext(shipment,owner);
@@ -97,22 +98,7 @@ module.exports = async function(deployer, network, accounts) {
     
   })
 
-  // console.log('shipment:',shipment);
-
-  // console.log('things[0]:',things[0]);
-  // console.log('keyValueStore:',keyValueStore);
-  // console.log('keyValueStore.address:',keyValueStore.address);
-  // await deployer.deploy(ShipmentContract,keyValueStore.address).then(async () => {
-  //   const shipmentContract = await ShipmentContract.deployed();
-  //   const f = await shipmentContract.contract.keyValueStore.call()
-  //   console.log('f:',f);
-  //   const g = await shipmentContract.goNext.call();
-  //   console.log('g:',g);
-  //   const h = shipmentContract.getCurrent.call();
-  //   console.log('h:',h);
-    
-
-  // })
+  
 
 };
 

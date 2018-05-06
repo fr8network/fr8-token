@@ -1,7 +1,6 @@
 pragma solidity ^0.4.18;
 
 import './deps/Ownable.sol';
-import './Queue.sol';
 import './deps/SafeMath.sol';
 
 contract ShipmentContract is Ownable {
@@ -19,28 +18,6 @@ contract ShipmentContract is Ownable {
     string entityStatus;
   }
 
-  enum QuoteStatus {
-    AWAITING_CARRIER
-  }
-  
-  enum BookedStatus { 
-    CARRIER_FOUND, 
-    CARRIER_ACCEPTED_AND_ASSIGEND, 
-    AWAITING_PICKUP,
-    LOADING,
-    EN_ROUTE,
-    ARRIVED,
-    SHIPMENT_ACCEPTED,
-    DEPARTED,
-    COMPLETE 
-  }
-
-  enum DeliveredStatus {
-    ACCEPTED,
-    ISSUE_RAISED,
-    AWAITING_RETURN,
-    REFUNDED
-  }
   function ShipmentContract() {
     curr = 0;
   }
@@ -109,23 +86,7 @@ contract ShipmentContract is Ownable {
     entityStructs[entityAddress].entityStatus = entityStatus;
     return true;
   }
-  /*
-  function ShipmentContract() public{
-    address keyValueStore = new KeyValueStore();
-    stores.push(keyValueStore);
-  }
-
-  function makeNew() public {
-    KeyValueStore keyValueStore = KeyValueStore(stores[0]);
-    address a = 0x59e4525a31C38f0879DD2894e9f13243F9c58925;
-    keyValueStore.newEntity(a,1,"foo");
-  }
-
-  function getStoreCount() public constant returns (uint entityCount){
-    KeyValueStore keyValueStore = KeyValueStore(stores[0]);
-    return keyValueStore.getEntityCount();
-  }
-  */
+  
 
 }
 
