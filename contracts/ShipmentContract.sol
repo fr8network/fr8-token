@@ -1,9 +1,23 @@
 pragma solidity ^0.4.18;
 
 import './deps/Ownable.sol';
-import './DoublyLinkedList.sol';
+import './Queue.sol';
+import './deps/SafeMath.sol';
 
 contract ShipmentContract is Ownable {
+  using SafeMath for uint;
+  mapping(uint256 => address) public queue;
+  uint256 first = 1;
+  uint256 last = 0;
+  uint256 curr;
+
+  event ChangeStatus(string prevString, string currString);
+
+  struct EntityStruct {
+    uint entityData;
+    bool isEntity;
+    string entityStatus;
+  }
 
   enum QuoteStatus {
     AWAITING_CARRIER
@@ -27,83 +41,91 @@ contract ShipmentContract is Ownable {
     AWAITING_RETURN,
     REFUNDED
   }
-
-  struct Phase {
-    QuoteStatus q;
-    BookedStatus b;
-    DeliveredStatus d;
-  }
-
-  // function updateStruct() public {
-  //   Phase storage q = QuoteStatus.AWAITING_CARRIER;
-  // }
-
-  mapping (uint => uint) statusMapping;
-  
-
-  function getValueOne() public view returns(uint) {
-      return statusMapping[uint(BookedStatus.CARRIER_FOUND)];
-  }
-
-  function typeCastUintToEnum() public view returns (BookedStatus) {
-    return BookedStatus(1);
-  }
-
-  mapping(uint => QuoteStatus) public quoteMapping;
-
-  // function setMapping(uint key, uint value) public {
-    
-  //   quoteMapping[key]  = value;
-  // }
-
-  function getEnum() public view returns (DeliveredStatus){
-    return DeliveredStatus.AWAITING_RETURN;
-  }
-  function getEnumAsNumber() public view returns (uint){
-    return uint(DeliveredStatus.AWAITING_RETURN);
-  }
-
-  function setPhase(uint i, uint j) public{
-    if (uint i === 0) {
-      
-    }
+  function ShipmentContract() {
+    curr = 0;
   }
   
-  function getEnumAfterTypeCasting(uint k) public view returns (DeliveredStatus) {
-    return DeliveredStatus(k);
+  function enqueue(address data) public {
+    last += 1;
+    queue[last] = data;
+  }
+
+  function dequeue() public returns (address data) {
+    require(last >= first);  // non-empty queue
+
+    data = queue[first];
+
+    delete queue[first];
+    first += 1;
+  }
+
+  function increment() public {
+    uint256 prev = curr;
+    uint256 next = curr.add(1);
+    curr = next;
+    address previous = queue[prev];
+    address current = queue[curr];
+    string a = entityStructs[previous].entityStatus;
+    string b = entityStructs[current].entityStatus;
+    ChangeStatus(a,b);
+
+  }
+
+  // returns the thing ahead of curr
+  function optimisticNext() public constant returns (string entityStatus){
+    uint256 next = curr.add(1);
+    address a = queue[next];
+    return entityStructs[a].entityStatus;
   }
 
 
+  mapping(address => EntityStruct) public entityStructs;
+  address[] public entityList;
+
+  function isEntity(address entityAddress) public constant returns(bool isIndeed) {
+      return entityStructs[entityAddress].isEntity;
+  }
+
+  function getAtIndex(uint ind) public constant returns(address entityAddress) {
+    return entityList[ind];
+  }
+
+  function getEntityCount() public constant returns(uint entityCount) {
+    return entityList.length;
+  }
+
+  function newEntity(address entityAddress, uint entityData, string entityStatus) public returns(uint rowNumber) {
+    assert(!isEntity(entityAddress));
+    entityStructs[entityAddress].entityData = entityData;
+    entityStructs[entityAddress].entityStatus = entityStatus;
+    entityStructs[entityAddress].isEntity = true;
+    enqueue(entityAddress);
+    return entityList.push(entityAddress).sub(1);
+  }
+
+  function updateEntity(address entityAddress, uint entityData, string entityStatus) public returns(bool success) {
+    assert(isEntity(entityAddress));
+    entityStructs[entityAddress].entityData = entityData;
+    entityStructs[entityAddress].entityStatus = entityStatus;
+    return true;
+  }
   /*
-   * Spec: frontend user needs a way to see the status of their shipping
-   *       in real time
-   *
-   * todo: add at least 6 lines of technical description for an engineer
-   * note: leave nothing to the imagination. include acceptance criteria
-   */
-   event statusChange(uint curr);
-  
-   /*
-    * Spec: user needs a way to sign a transaction to move the status 
-    *       of the shipment to the next field iteratively 
-    */
-    function nextStatus() public returns (bool success){
-        // create mapping object to check which phase (quote, book, deliv)
+  function ShipmentContract() public{
+    address keyValueStore = new KeyValueStore();
+    stores.push(keyValueStore);
+  }
 
-        // add logic to check which enum it is, and whether its at end
-        uint curr = 1;
+  function makeNew() public {
+    KeyValueStore keyValueStore = KeyValueStore(stores[0]);
+    address a = 0x59e4525a31C38f0879DD2894e9f13243F9c58925;
+    keyValueStore.newEntity(a,1,"foo");
+  }
 
-        if (curr == uint(BookedStatus.COMPLETE)) {
-          return false;
-        }
-        curr += curr + 1;
-
-        // can you do reverse typecast?
-
-        
-        return true;
-    }
-
+  function getStoreCount() public constant returns (uint entityCount){
+    KeyValueStore keyValueStore = KeyValueStore(stores[0]);
+    return keyValueStore.getEntityCount();
+  }
+  */
 
 }
 

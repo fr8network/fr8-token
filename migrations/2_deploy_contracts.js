@@ -1,18 +1,136 @@
+require('babel-register');
+require('babel-polyfill');
+
 const TestToken = artifacts.require("./Fr8NetworkToken.sol");
 const ShipmentContract = artifacts.require("./ShipmentContract.sol");
-module.exports = function(deployer, network, accounts) {
+const KeyValueStore = artifacts.require("./KeyValueStore.sol");
+const Queue = artifacts.require("./Queue");
+
+const connection = 'http://localhost:8545';
+const uuidv4 = require('uuid/v4');
+const Eth = require('web3-eth');
+const Web3 = require('web3');
+
+const web3 = new Web3(connection);
+const eth = new Eth(connection);
+web3.eth.getTransactionReceiptMined = require('../util/getTransactionReceiptMined.js');
+
+async function doThings(store,bookedStatuses,owner) {
+  return Promise.all(bookedStatuses.map((entity) => {
+    const { entityAddress, entityData, entityStatus } = entity;
+    return store.newEntity(entityAddress,entityData,entityStatus,{
+      from: owner
+    })
+  }))
+}
+
+async function confirmNext(shipment,owner) {
+  return shipment.increment({from:owner}).then(res => {
+    const { tx } = res;
+    console.log('tx:',tx);
+    return web3.eth.getTransactionReceiptMined(tx)
+      .then(cb => {
+        
+        return cb;
+      })
+  })
+  .then(res => {
+
+
+    const { data, topics} = res.logs[0];
+    console.log('data:',data);
+    console.log('topics:',topics);
+    const myInputs = [{
+      type: 'string',
+      name: 'prevString',
+      indexed: false
+    },{
+      type: 'string',
+      name: 'currString',
+      indexed: false
+    }]
+    const decoded = web3.eth.abi.decodeLog(myInputs,data,topics);
+    console.log('decoded:',decoded);
+    return res;
+  })  
+}
+
+module.exports = async function(deployer, network, accounts) {
   const owner = accounts[0];
+  let shipment;
   // const owner = "0x11f0cdddd75259b02418e5c116d904621632a590";
-  deployer.deploy(TestToken).then(async () => {
+  await deployer.deploy(TestToken).then(async () => {
     const token = await TestToken.deployed();
     // return deployer.deploy(TokenSale, token.address, owner);
   });
 
-  deployer.deploy(ShipmentContract).then(async () => {
-    const shipmentContract = await ShipmentContract.deployed();
+  await deployer.deploy(ShipmentContract).then(async() => {
+    shipment = await ShipmentContract.deployed();
+    const bookedStatuses = getBookedStatuses().map((status,i) => {
+      return {
+        entityAddress: web3.utils.soliditySha3(status),
+        entityData: i,
+        entityStatus: status
+      }
+    })
+    const gg = await doThings(shipment,bookedStatuses,owner);
+    const count = await shipment.getEntityCount();
+    console.log('count:',count);
+    let q = [];
+    q[0] = await shipment.queue.call(1);
+    q[1] = await shipment.queue.call(2);
+    q[2] = await shipment.queue.call(3);
+    q[3] = await shipment.queue.call(4);
+    console.log('q:',q);
+    const opt2 = await shipment.optimisticNext();
+    
+    const next = await shipment.increment();
+    const opt3 = await shipment.optimisticNext();
+    
+    const a =  await confirmNext(shipment,owner);
+
+    await confirmNext(shipment,owner);
+    await confirmNext(shipment,owner);
+    const opt4 = await shipment.optimisticNext();
+    // console.log('next:',next);
+    const confirmed = await confirmNext(shipment,owner);
+
+    const {logs } = confirmed;
+    
   })
 
+  // console.log('shipment:',shipment);
+
+  // console.log('things[0]:',things[0]);
+  // console.log('keyValueStore:',keyValueStore);
+  // console.log('keyValueStore.address:',keyValueStore.address);
+  // await deployer.deploy(ShipmentContract,keyValueStore.address).then(async () => {
+  //   const shipmentContract = await ShipmentContract.deployed();
+  //   const f = await shipmentContract.contract.keyValueStore.call()
+  //   console.log('f:',f);
+  //   const g = await shipmentContract.goNext.call();
+  //   console.log('g:',g);
+  //   const h = shipmentContract.getCurrent.call();
+  //   console.log('h:',h);
+    
+
+  // })
+
 };
+
+function getBookedStatuses() {
+  return [
+    "CARRIER_FOUND", 
+    "CARRIER_ACCEPTED_AND_ASSIGEND", 
+    "AWAITING_PICKUP",
+    "LOADING",
+    "EN_ROUTE",
+    "ARRIVED",
+    "SHIPMENT_ACCEPTED",
+    "DEPARTED",
+    "COMPLETE "
+  ];
+}
 
 // Running migration: 1_initial_migration.js
 //   Deploying Migrations...
