@@ -38,8 +38,6 @@ async function confirmNext(shipment,owner) {
 
 
     const { data, topics} = res.logs[0];
-    console.log('data:',data);
-    console.log('topics:',topics);
     const myInputs = [{
       type: 'string',
       name: 'prevString',
