@@ -9,6 +9,12 @@ contract ShipmentContract is Ownable {
   uint256 first = 1;
   uint256 last = 0;
   uint256 curr;
+  uint256 shipmentValue;
+  uint256 weightLbs; 
+  uint256 numPieces; 
+  uint256 poNumber; 
+  uint256 shipmentId; 
+  uint256 totalCost;
 
   event ChangeStatus(string prevString, string currString);
 
@@ -18,8 +24,14 @@ contract ShipmentContract is Ownable {
     string entityStatus;
   }
 
-  function ShipmentContract() {
+  function ShipmentContract(uint256 _shipmentValue, uint256 _weightLbs, uint256 _numPieces, uint256 _poNumber, uint256 _shipmentId, uint256 _totalCost) {
     curr = 0;
+    shipmentValue = _shipmentValue;
+    weightLbs = _weightLbs; 
+    numPieces = _numPieces; 
+    poNumber = _poNumber; 
+    shipmentId = _shipmentId;  
+    totalCost = _totalCost;
   }
   
   function enqueue(address data) public {

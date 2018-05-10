@@ -55,7 +55,22 @@ module.exports = async function(deployer, network, accounts) {
     // return deployer.deploy(TokenSale, token.address, owner);
   });
 
-  await deployer.deploy(ShipmentContract).then(async() => {
+  const shipmentValue = 3500; //usd
+  const weightLbs = 12000;
+  const numPieces = 6;
+  const poNumber = 18504502;
+  const shipmentId = 49504020;
+  const totalCost = 400;
+
+  await deployer.deploy(
+    ShipmentContract,
+    shipmentValue,
+    weightLbs,
+    numPieces,
+    poNumber,
+    shipmentId,
+    totalCost
+  ).then(async() => {
     shipment = await ShipmentContract.deployed();
     const bookedStatuses = getBookedStatuses().map((status,i) => {
       return {
