@@ -68,8 +68,8 @@ contract ShipmentContract is Ownable {
     curr = next;
     address previous = queue[prev];
     address current = queue[curr];
-    string a = entityStructs[previous].entityStatus;
-    string b = entityStructs[current].entityStatus;
+    string memory a = entityStructs[previous].entityStatus;
+    string memory b = entityStructs[current].entityStatus;
     ChangeStatus(a,b);
 
   }
