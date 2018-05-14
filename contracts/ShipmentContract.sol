@@ -2,9 +2,13 @@ pragma solidity ^0.4.18;
 
 import './deps/Ownable.sol';
 import './deps/SafeMath.sol';
+import '../node_modules/zeppelin-solidity/contracts/token//ERC20/ERC20Basic.sol';
+import '../node_modules/zeppelin-solidity/contracts/token/ERC20/SafeERC20.sol';
 
 contract ShipmentContract is Ownable {
   using SafeMath for uint;
+  using SafeERC20 for ERC20Basic;
+
   mapping(uint256 => address) public queue;
   uint256 first = 1;
   uint256 last = 0;
@@ -25,10 +29,14 @@ contract ShipmentContract is Ownable {
   }
 
   /**
-  args:
-
+  Deploy args: all uint256
   
+  3500,12000,6,18504502,49504020,400
   */
+
+  function settlePayments(ERC20Basic token) {
+    token.safeTransfer(msg.sender, 10);
+  }
 
   function ShipmentContract(uint256 _shipmentValue, uint256 _weightLbs, uint256 _numPieces, uint256 _poNumber, uint256 _shipmentId, uint256 _totalCost) {
     curr = 0;
