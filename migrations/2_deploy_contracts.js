@@ -52,7 +52,6 @@ module.exports = async function(deployer, network, accounts) {
   // const owner = "0x11f0cdddd75259b02418e5c116d904621632a590";
   await deployer.deploy(TestToken).then(async () => {
     const token = await TestToken.deployed();
-    // return deployer.deploy(TokenSale, token.address, owner);
   });
 
   const shipmentValue = 3500; //usd
@@ -119,15 +118,11 @@ module.exports = async function(deployer, network, accounts) {
 
 function getBookedStatuses() {
   return [
-    "CARRIER_FOUND", 
-    "CARRIER_ACCEPTED_AND_ASSIGEND", 
-    "AWAITING_PICKUP",
-    "LOADING",
-    "EN_ROUTE",
-    "ARRIVED",
-    "SHIPMENT_ACCEPTED",
-    "DEPARTED",
-    "COMPLETE "
+    "SHIPMENT_BOOKED",
+    "CARRIER_ASSIGNED",
+    "EN_ROUTE_TO_DESTINATION",
+    "ARRIVED_AT_DESTINATION",
+    "SHIPMENT_DELIVERED",
   ];
 }
 
