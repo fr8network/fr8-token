@@ -24,6 +24,12 @@ contract ShipmentContract is Ownable {
     string entityStatus;
   }
 
+  /**
+  args:
+
+  
+  */
+
   function ShipmentContract(uint256 _shipmentValue, uint256 _weightLbs, uint256 _numPieces, uint256 _poNumber, uint256 _shipmentId, uint256 _totalCost) {
     curr = 0;
     shipmentValue = _shipmentValue;

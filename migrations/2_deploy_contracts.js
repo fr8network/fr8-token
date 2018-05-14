@@ -3,8 +3,6 @@ require('babel-polyfill');
 
 const TestToken = artifacts.require("./Fr8NetworkToken.sol");
 const ShipmentContract = artifacts.require("./ShipmentContract.sol");
-const KeyValueStore = artifacts.require("./KeyValueStore.sol");
-const Queue = artifacts.require("./Queue");
 
 const connection = 'http://localhost:8545';
 const uuidv4 = require('uuid/v4');
