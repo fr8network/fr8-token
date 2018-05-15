@@ -16,7 +16,7 @@ contract ShipmentContract is Ownable {
   uint256 shipmentValue;
   uint256 weightLbs; 
   uint256 numPieces; 
-  uint256 poNumber; 
+  string poNumber; 
   uint256 shipmentId; 
   uint256 totalCost;
 
@@ -38,7 +38,7 @@ contract ShipmentContract is Ownable {
     token.safeTransfer(msg.sender, 10);
   }
 
-  function ShipmentContract(uint256 _shipmentValue, uint256 _weightLbs, uint256 _numPieces, uint256 _poNumber, uint256 _shipmentId, uint256 _totalCost) {
+  function ShipmentContract(uint256 _shipmentValue, uint256 _weightLbs, uint256 _numPieces, string _poNumber, uint256 _shipmentId, uint256 _totalCost) {
     curr = 0;
     shipmentValue = _shipmentValue;
     weightLbs = _weightLbs; 
