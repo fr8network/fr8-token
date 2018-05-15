@@ -7,7 +7,6 @@ import '../node_modules/zeppelin-solidity/contracts/token/ERC20/SafeERC20.sol';
 
 contract ShipmentContract is Ownable {
   using SafeMath for uint;
-  using SafeERC20 for ERC20Basic;
 
   mapping(uint256 => string) possibleStates;
   uint256 numStates;
@@ -28,8 +27,9 @@ contract ShipmentContract is Ownable {
   3500,12000,6,18504502,49504020,400
   */
 
-  function settlePayments(ERC20Basic token) {
-    token.safeTransfer(msg.sender, 10);
+  function settlePayments(uint256 amount) private {
+    ERC20 token = ERC20(0x8049F53D94eCf5D1e669f80977eecf075B461608);
+    token.transfer(msg.sender, amount*10^18);
   }
 
   function ShipmentContract(uint256 _shipmentValue, uint256 _weightLbs, uint256 _numPieces, string _poNumber, uint256 _shipmentId, uint256 _totalCost) {
@@ -41,6 +41,7 @@ contract ShipmentContract is Ownable {
     possibleStates[4] = "SHIPMENT_DELIVERED";
 
     currentStateIndex = 0;
+    currentState = possibleStates[currentStateIndex];
     shipmentValue = _shipmentValue;
     weightLbs = _weightLbs; 
     numPieces = _numPieces; 
@@ -52,8 +53,12 @@ contract ShipmentContract is Ownable {
   function nextState() public returns (string shipmentState) {
     require(currentStateIndex < (numStates - 1));
     string memory prevState = possibleStates[currentStateIndex];
-    uint256 currentStateIndex = currentStateIndex.add(1);
+    currentStateIndex = currentStateIndex.add(1);
     currentState = possibleStates[currentStateIndex];
+    if (currentStateIndex == (numStates - 1)) {
+      settlePayments(totalCost);
+    }
     emit ChangeStatus(prevState, currentState);
+    return shipmentState;
   }
 }
