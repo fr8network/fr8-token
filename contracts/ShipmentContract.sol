@@ -9,10 +9,10 @@ contract ShipmentContract is Ownable {
   using SafeMath for uint;
   using SafeERC20 for ERC20Basic;
 
-  mapping(uint256 => address) public queue;
-  uint256 first = 1;
-  uint256 last = 0;
-  uint256 curr;
+  mapping(uint256 => string) possibleStates;
+  uint256 numStates;
+  uint256 currentStateIndex;
+  string public currentState;
   uint256 shipmentValue;
   uint256 weightLbs; 
   uint256 numPieces; 
@@ -21,12 +21,6 @@ contract ShipmentContract is Ownable {
   uint256 totalCost;
 
   event ChangeStatus(string prevString, string currString);
-
-  struct EntityStruct {
-    uint entityData;
-    bool isEntity;
-    string entityStatus;
-  }
 
   /**
   Deploy args: all uint256
@@ -39,7 +33,14 @@ contract ShipmentContract is Ownable {
   }
 
   function ShipmentContract(uint256 _shipmentValue, uint256 _weightLbs, uint256 _numPieces, string _poNumber, uint256 _shipmentId, uint256 _totalCost) {
-    curr = 0;
+    numStates = 5;
+    possibleStates[0] = "SHIPMENT_BOOKED";
+    possibleStates[1] = "CARRIER_ASSIGNED";
+    possibleStates[2] = "EN_ROUTE_TO_DESTINATION";
+    possibleStates[3] = "ARRIVED_AT_DESTINATION";
+    possibleStates[4] = "SHIPMENT_DELIVERED";
+
+    currentStateIndex = 0;
     shipmentValue = _shipmentValue;
     weightLbs = _weightLbs; 
     numPieces = _numPieces; 
@@ -47,73 +48,12 @@ contract ShipmentContract is Ownable {
     shipmentId = _shipmentId;  
     totalCost = _totalCost;
   }
-  
-  function enqueue(address data) public {
-    last += 1;
-    queue[last] = data;
+
+  function nextState() public returns (string shipmentState) {
+    require(currentStateIndex < (numStates - 1));
+    string memory prevState = possibleStates[currentStateIndex];
+    uint256 currentStateIndex = currentStateIndex.add(1);
+    currentState = possibleStates[currentStateIndex];
+    emit ChangeStatus(prevState, currentState);
   }
-
-  function dequeue() public returns (address data) {
-    require(last >= first);  // non-empty queue
-
-    data = queue[first];
-
-    delete queue[first];
-    first += 1;
-  }
-
-  function increment() public {
-    uint256 prev = curr;
-    uint256 next = curr.add(1);
-    curr = next;
-    address previous = queue[prev];
-    address current = queue[curr];
-    string memory a = entityStructs[previous].entityStatus;
-    string memory b = entityStructs[current].entityStatus;
-    ChangeStatus(a,b);
-
-  }
-
-  // returns the thing ahead of curr
-  function optimisticNext() public constant returns (string entityStatus){
-    uint256 next = curr.add(1);
-    address a = queue[next];
-    return entityStructs[a].entityStatus;
-  }
-
-
-  mapping(address => EntityStruct) public entityStructs;
-  address[] public entityList;
-
-  function isEntity(address entityAddress) public constant returns(bool isIndeed) {
-      return entityStructs[entityAddress].isEntity;
-  }
-
-  function getAtIndex(uint ind) public constant returns(address entityAddress) {
-    return entityList[ind];
-  }
-
-  function getEntityCount() public constant returns(uint entityCount) {
-    return entityList.length;
-  }
-
-  function newEntity(address entityAddress, uint entityData, string entityStatus) public returns(uint rowNumber) {
-    assert(!isEntity(entityAddress));
-    entityStructs[entityAddress].entityData = entityData;
-    entityStructs[entityAddress].entityStatus = entityStatus;
-    entityStructs[entityAddress].isEntity = true;
-    enqueue(entityAddress);
-    return entityList.push(entityAddress).sub(1);
-  }
-
-  function updateEntity(address entityAddress, uint entityData, string entityStatus) public returns(bool success) {
-    assert(isEntity(entityAddress));
-    entityStructs[entityAddress].entityData = entityData;
-    entityStructs[entityAddress].entityStatus = entityStatus;
-    return true;
-  }
-  
-
 }
-
-
