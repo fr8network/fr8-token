@@ -41,7 +41,7 @@ contract ShipmentContract is Ownable {
     possibleStates[3] = "ARRIVED_AT_DESTINATION";
     possibleStates[4] = "SHIPMENT_DELIVERED";
 
-    currentStateIndex = 0;
+    currentStateIndex = 1;
     currentState = possibleStates[currentStateIndex];
     shipmentValue = _shipmentValue;
     weightLbs = _weightLbs; 
