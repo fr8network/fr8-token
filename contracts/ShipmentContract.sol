@@ -53,14 +53,14 @@ contract ShipmentContract is Ownable {
   }
 
   function nextState() public returns (string shipmentState) {
-    require(currentStateIndex < (numStates - 1));
+    require(currentStateIndex < (numStates.sub(1)));
     string memory prevState = possibleStates[currentStateIndex];
     currentStateIndex = currentStateIndex.add(1);
     currentState = possibleStates[currentStateIndex];
-    if (currentStateIndex == (numStates - 1)) {
+    if (currentStateIndex == (numStates.sub(1))) {
       settlePayments(totalCost);
     }
-    emit ChangeStatus(prevState, currentState);
+    ChangeStatus(prevState, currentState);
     return shipmentState;
   }
 }
