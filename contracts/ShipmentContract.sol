@@ -30,7 +30,7 @@ contract ShipmentContract is Ownable {
 
   function settlePayments(uint256 amount) private {
     ERC20 token = ERC20(0x8049F53D94eCf5D1e669f80977eecf075B461608);
-    token.transfer(beneficiary, amount*10^18);
+    token.transfer(beneficiary, amount*(10**18));
   }
 
   function ShipmentContract(uint256 _shipmentValue, uint256 _weightLbs, uint256 _numPieces, string _poNumber, uint256 _shipmentId, uint256 _totalCost, address _beneficiary) {
