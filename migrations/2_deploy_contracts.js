@@ -1,13 +1,128 @@
-const TestToken = artifacts.require("./Fr8NetworkToken.sol");
+require('babel-register');
+require('babel-polyfill');
 
-module.exports = function(deployer, network, accounts) {
+const TestToken = artifacts.require("./Fr8NetworkToken.sol");
+const ShipmentContract = artifacts.require("./ShipmentContract.sol");
+
+const connection = 'http://localhost:8545';
+const uuidv4 = require('uuid/v4');
+const Eth = require('web3-eth');
+const Web3 = require('web3');
+
+const web3 = new Web3(connection);
+const eth = new Eth(connection);
+web3.eth.getTransactionReceiptMined = require('../util/getTransactionReceiptMined.js');
+
+async function doThings(store,bookedStatuses,owner) {
+  return Promise.all(bookedStatuses.map((entity) => {
+    const { entityAddress, entityData, entityStatus } = entity;
+    return store.newEntity(entityAddress,entityData,entityStatus,{
+      from: owner
+    })
+  }))
+}
+
+async function confirmNext(shipment,owner) {
+  return shipment.increment({from:owner}).then(res => {
+    const { tx } = res;
+    return web3.eth.getTransactionReceiptMined(tx)
+  })
+  .then(res => {
+    const { data, topics} = res.logs[0];
+    const myInputs = [{
+      type: 'string',
+      name: 'prevString',
+      indexed: false
+    },{
+      type: 'string',
+      name: 'currString',
+      indexed: false
+    }]
+    const decoded = web3.eth.abi.decodeLog(myInputs,data,topics);
+    const { prevString, currString } = decoded;
+    return { prevString, currString };
+  })  
+}
+
+module.exports = async function(deployer, network, accounts) {
   const owner = accounts[0];
+  let shipment;
   // const owner = "0x11f0cdddd75259b02418e5c116d904621632a590";
-  deployer.deploy(TestToken).then(async () => {
+  await deployer.deploy(TestToken).then(async () => {
     const token = await TestToken.deployed();
-    // return deployer.deploy(TokenSale, token.address, owner);
   });
+
+  const shipmentValue = 3500; //usd
+  const weightLbs = 12000;
+  const numPieces = 6;
+  const poNumber = 18504502;
+  const shipmentId = 49504020;
+  const totalCost = 400;
+
+  await deployer.deploy(
+    ShipmentContract,
+    shipmentValue,
+    weightLbs,
+    numPieces,
+    poNumber,
+    shipmentId,
+    totalCost
+  ).then(async() => {
+    shipment = await ShipmentContract.deployed();
+    const bookedStatuses = getBookedStatuses().map((status,i) => {
+      return {
+        entityAddress: web3.utils.soliditySha3(status),
+        entityData: i,
+        entityStatus: status
+      }
+    })
+    const gg = await doThings(shipment,bookedStatuses,owner);
+    const count = await shipment.getEntityCount();
+    console.log('count:',count);
+    let q = [];
+    q[0] = await shipment.queue.call(1);
+    q[1] = await shipment.queue.call(2);
+    q[2] = await shipment.queue.call(3);
+    q[3] = await shipment.queue.call(4);
+    console.log('q:',q);
+    const opt2 = await shipment.optimisticNext();
+    
+    const next = await shipment.increment();
+    const opt3 = await shipment.optimisticNext();
+    
+
+    const a =  await confirmNext(shipment,owner);
+    console.log('a:',a);
+
+    const b = await confirmNext(shipment,owner);
+    console.log('b:',b);
+    const c = await confirmNext(shipment,owner);
+    console.log('c:',c);
+    const d = await confirmNext(shipment,owner);
+    console.log('d:',d);
+
+
+    const opt4 = await shipment.optimisticNext();
+    // console.log('next:',next);
+    const confirmed = await confirmNext(shipment,owner);
+
+    const {logs } = confirmed;
+    
+  })
+
+  
+
 };
+
+function getBookedStatuses() {
+  return [
+    "SHIPMENT_BOOKED",
+    "CARRIER_ASSIGNED",
+    "EN_ROUTE_TO_DESTINATION",
+    "ARRIVED_AT_DESTINATION",
+    "SHIPMENT_DELIVERED",
+  ];
+}
 
 // Running migration: 1_initial_migration.js
 //   Deploying Migrations...

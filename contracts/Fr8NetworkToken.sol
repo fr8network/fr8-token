@@ -7,7 +7,7 @@ import './deps/ApproveAndCallFallBack.sol';
 
 
 contract Fr8NetworkToken is ERC20Interface, Ownable {
-  using SafeMath for uint;
+  using SafeMath for uint256;
 
   // standard ERC20 stuff
   string public symbol;
