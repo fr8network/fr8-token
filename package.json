@@ -3,12 +3,12 @@
   "version": "1.0.0",
   "description": "Vault Smart Contract",
   "scripts": {
-    "test": "scripts/test.sh",
+    "test": "SKIP_FULL_VESTING_CONTRACTS_DEPLOYMENT=true scripts/test.sh",
     "lint": "eslint .",
     "console": "truffle console",
     "coverage": "scripts/test.sh",
-    "test": "SKIP_FULL_VESTING_CONTRACTS_DEPLOYMENT=true scripts/test.sh",
-    "myscript": "./node_modules/.bin/babel myscript.js --experimental --source-maps-inline -d ./dist && node ./dist/myscript.js"
+    "myscript": "./node_modules/.bin/babel myscript.js --experimental --source-maps-inline -d ./dist && node ./dist/myscript.js",
+    "build-contracts": "sol-merger './contracts/ShipmentContract.sol' ./build"
   },
   "license": "MIT",
   "devDependencies": {
@@ -38,6 +38,7 @@
     "babel-cli": "^6.26.0",
     "dotenv": "^5.0.1",
     "ganache-cli": "git+https://git@github.com/vadshalamov/ganache-cli.git#ff179fd",
+    "sol-merger": "^0.1.2",
     "uuid": "^3.2.1",
     "web3": "^1.0.0-beta.33",
     "web3-eth": "^1.0.0-beta.33",
